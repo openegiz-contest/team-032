@@ -23,6 +23,13 @@ deploy/compose/.example-mine
 __pycache__/
 *.pyc
 
+# Local AI authoring tools and temporary agent artifacts.
+/.codex-*/
+/ai/
+/spec-kit-main/
+/tmp/
+/build/extended-api-src/
+
 # Demo Unity scene, downloaded by `make unity-demo` (88 MB, lives in a release)
 build/WebGL Build.loader.js
 build/WebGL Build.framework.js

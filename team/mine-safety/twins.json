@@ -1,0 +1,103 @@
+{
+  "org.openegiz.safety:mine-01": {
+    "policyId": "default:basic_policy",
+    "attributes": {
+      "name": "Учебная подземная шахта",
+      "_isType": false,
+      "kind": "mine",
+      "model": "underground-safety-demo",
+      "language": "ru"
+    },
+    "features": {
+      "state": {"properties": {"value": "normal"}},
+      "overall_risk": {"properties": {"value": "normal"}},
+      "active_scenario": {"properties": {"value": "none"}},
+      "affected_people": {"properties": {"value": 0, "unit": "people"}}
+    }
+  },
+  "org.openegiz.safety:zone-shaft": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Ствол", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "zone", "zone": "shaft", "connected_to": ["main_drift"], "airflow_to": ["main_drift"]},
+    "features": {"state": {"properties": {"value": "normal"}}, "current_zone": {"properties": {"value": "shaft"}}, "risk_level": {"properties": {"value": "normal"}}, "airflow_direction": {"properties": {"value": "main_drift"}}, "airflow_speed": {"properties": {"value": 3.2, "unit": "m/s"}}}
+  },
+  "org.openegiz.safety:zone-main-drift": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Главный штрек", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "zone", "zone": "main_drift", "connected_to": ["shaft", "section_a", "section_b", "refuge_chamber"], "airflow_to": ["section_a", "section_b", "refuge_chamber"]},
+    "features": {"state": {"properties": {"value": "normal"}}, "current_zone": {"properties": {"value": "main_drift"}}, "risk_level": {"properties": {"value": "normal"}}, "airflow_direction": {"properties": {"value": "section_a,section_b,refuge_chamber"}}, "airflow_speed": {"properties": {"value": 2.8, "unit": "m/s"}}}
+  },
+  "org.openegiz.safety:zone-section-a": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Добычной участок A", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "zone", "zone": "section_a", "connected_to": ["main_drift"], "airflow_to": []},
+    "features": {"state": {"properties": {"value": "normal"}}, "current_zone": {"properties": {"value": "section_a"}}, "risk_level": {"properties": {"value": "normal"}}, "airflow_direction": {"properties": {"value": "return"}}, "airflow_speed": {"properties": {"value": 2.1, "unit": "m/s"}}}
+  },
+  "org.openegiz.safety:zone-section-b": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Добычной участок B", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "zone", "zone": "section_b", "connected_to": ["main_drift"], "airflow_to": []},
+    "features": {"state": {"properties": {"value": "normal"}}, "current_zone": {"properties": {"value": "section_b"}}, "risk_level": {"properties": {"value": "normal"}}, "airflow_direction": {"properties": {"value": "return"}}, "airflow_speed": {"properties": {"value": 2.0, "unit": "m/s"}}}
+  },
+  "org.openegiz.safety:zone-refuge-chamber": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Эвакуационная камера", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "zone", "zone": "refuge_chamber", "connected_to": ["main_drift"], "airflow_to": []},
+    "features": {"state": {"properties": {"value": "normal"}}, "current_zone": {"properties": {"value": "refuge_chamber"}}, "risk_level": {"properties": {"value": "normal"}}, "airflow_direction": {"properties": {"value": "protected_return"}}, "airflow_speed": {"properties": {"value": 1.5, "unit": "m/s"}}}
+  },
+  "org.openegiz.safety:fan-main": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Главный вентилятор", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "fan", "fan_role": "main", "zone": "shaft"},
+    "features": {"state": {"properties": {"value": "running"}}, "current_zone": {"properties": {"value": "shaft"}}, "speed_percent": {"properties": {"value": 100, "unit": "%"}}, "airflow": {"properties": {"value": 3.2, "unit": "m/s"}}}
+  },
+  "org.openegiz.safety:fan-aux-a": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Вспомогательный вентилятор A", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "fan", "fan_role": "auxiliary", "zone": "section_a"},
+    "features": {"state": {"properties": {"value": "running"}}, "current_zone": {"properties": {"value": "section_a"}}, "speed_percent": {"properties": {"value": 75, "unit": "%"}}, "airflow": {"properties": {"value": 2.1, "unit": "m/s"}}}
+  },
+  "org.openegiz.safety:fan-aux-b": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Вспомогательный вентилятор B", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "fan", "fan_role": "auxiliary", "zone": "section_b"},
+    "features": {"state": {"properties": {"value": "running"}}, "current_zone": {"properties": {"value": "section_b"}}, "speed_percent": {"properties": {"value": 75, "unit": "%"}}, "airflow": {"properties": {"value": 2.0, "unit": "m/s"}}}
+  },
+  "org.openegiz.safety:sensor-shaft": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Датчик — Ствол", "_isType": false, "_parents": "org.openegiz.safety:zone-shaft", "kind": "sensor", "zone": "shaft", "sensor_type": "multi-gas-airflow"},
+    "features": {"state": {"properties": {"value": "online"}}, "current_zone": {"properties": {"value": "shaft"}}, "methane_pct": {"properties": {"value": 0.18, "unit": "%"}}, "co_ppm": {"properties": {"value": 4, "unit": "ppm"}}, "smoke_index": {"properties": {"value": 0.02}}, "temperature_c": {"properties": {"value": 19, "unit": "°C"}}, "airflow_mps": {"properties": {"value": 3.2, "unit": "m/s"}}}
+  },
+  "org.openegiz.safety:sensor-main-drift": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Датчик — Главный штрек", "_isType": false, "_parents": "org.openegiz.safety:zone-main-drift", "kind": "sensor", "zone": "main_drift", "sensor_type": "multi-gas-airflow"},
+    "features": {"state": {"properties": {"value": "online"}}, "current_zone": {"properties": {"value": "main_drift"}}, "methane_pct": {"properties": {"value": 0.22, "unit": "%"}}, "co_ppm": {"properties": {"value": 5, "unit": "ppm"}}, "smoke_index": {"properties": {"value": 0.02}}, "temperature_c": {"properties": {"value": 20, "unit": "°C"}}, "airflow_mps": {"properties": {"value": 2.8, "unit": "m/s"}}}
+  },
+  "org.openegiz.safety:sensor-section-a": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Датчик — Участок A", "_isType": false, "_parents": "org.openegiz.safety:zone-section-a", "kind": "sensor", "zone": "section_a", "sensor_type": "multi-gas-airflow"},
+    "features": {"state": {"properties": {"value": "online"}}, "current_zone": {"properties": {"value": "section_a"}}, "methane_pct": {"properties": {"value": 0.35, "unit": "%"}}, "co_ppm": {"properties": {"value": 6, "unit": "ppm"}}, "smoke_index": {"properties": {"value": 0.03}}, "temperature_c": {"properties": {"value": 23, "unit": "°C"}}, "airflow_mps": {"properties": {"value": 2.1, "unit": "m/s"}}}
+  },
+  "org.openegiz.safety:sensor-section-b": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Датчик — Участок B", "_isType": false, "_parents": "org.openegiz.safety:zone-section-b", "kind": "sensor", "zone": "section_b", "sensor_type": "multi-gas-airflow"},
+    "features": {"state": {"properties": {"value": "online"}}, "current_zone": {"properties": {"value": "section_b"}}, "methane_pct": {"properties": {"value": 0.32, "unit": "%"}}, "co_ppm": {"properties": {"value": 6, "unit": "ppm"}}, "smoke_index": {"properties": {"value": 0.03}}, "temperature_c": {"properties": {"value": 22, "unit": "°C"}}, "airflow_mps": {"properties": {"value": 2.0, "unit": "m/s"}}}
+  },
+  "org.openegiz.safety:sensor-refuge-chamber": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Датчик — Эвакуационная камера", "_isType": false, "_parents": "org.openegiz.safety:zone-refuge-chamber", "kind": "sensor", "zone": "refuge_chamber", "sensor_type": "multi-gas-airflow"},
+    "features": {"state": {"properties": {"value": "online"}}, "current_zone": {"properties": {"value": "refuge_chamber"}}, "methane_pct": {"properties": {"value": 0.12, "unit": "%"}}, "co_ppm": {"properties": {"value": 3, "unit": "ppm"}}, "smoke_index": {"properties": {"value": 0.01}}, "temperature_c": {"properties": {"value": 20, "unit": "°C"}}, "airflow_mps": {"properties": {"value": 1.5, "unit": "m/s"}}}
+  },
+  "org.openegiz.safety:worker-01": {"policyId": "default:basic_policy", "attributes": {"name": "Работник 01", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "worker", "zone": "shaft"}, "features": {"state": {"properties": {"value": "safe"}}, "current_zone": {"properties": {"value": "shaft"}}, "evacuation_status": {"properties": {"value": "none"}}}},
+  "org.openegiz.safety:worker-02": {"policyId": "default:basic_policy", "attributes": {"name": "Работник 02", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "worker", "zone": "main_drift"}, "features": {"state": {"properties": {"value": "safe"}}, "current_zone": {"properties": {"value": "main_drift"}}, "evacuation_status": {"properties": {"value": "none"}}}},
+  "org.openegiz.safety:worker-03": {"policyId": "default:basic_policy", "attributes": {"name": "Работник 03", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "worker", "zone": "main_drift"}, "features": {"state": {"properties": {"value": "safe"}}, "current_zone": {"properties": {"value": "main_drift"}}, "evacuation_status": {"properties": {"value": "none"}}}},
+  "org.openegiz.safety:worker-04": {"policyId": "default:basic_policy", "attributes": {"name": "Работник 04", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "worker", "zone": "section_a"}, "features": {"state": {"properties": {"value": "safe"}}, "current_zone": {"properties": {"value": "section_a"}}, "evacuation_status": {"properties": {"value": "none"}}}},
+  "org.openegiz.safety:worker-05": {"policyId": "default:basic_policy", "attributes": {"name": "Работник 05", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "worker", "zone": "section_a"}, "features": {"state": {"properties": {"value": "safe"}}, "current_zone": {"properties": {"value": "section_a"}}, "evacuation_status": {"properties": {"value": "none"}}}},
+  "org.openegiz.safety:worker-06": {"policyId": "default:basic_policy", "attributes": {"name": "Работник 06", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "worker", "zone": "section_a"}, "features": {"state": {"properties": {"value": "safe"}}, "current_zone": {"properties": {"value": "section_a"}}, "evacuation_status": {"properties": {"value": "none"}}}},
+  "org.openegiz.safety:worker-07": {"policyId": "default:basic_policy", "attributes": {"name": "Работник 07", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "worker", "zone": "section_b"}, "features": {"state": {"properties": {"value": "safe"}}, "current_zone": {"properties": {"value": "section_b"}}, "evacuation_status": {"properties": {"value": "none"}}}},
+  "org.openegiz.safety:worker-08": {"policyId": "default:basic_policy", "attributes": {"name": "Работник 08", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "worker", "zone": "section_b"}, "features": {"state": {"properties": {"value": "safe"}}, "current_zone": {"properties": {"value": "section_b"}}, "evacuation_status": {"properties": {"value": "none"}}}},
+  "org.openegiz.safety:worker-09": {"policyId": "default:basic_policy", "attributes": {"name": "Работник 09", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "worker", "zone": "section_b"}, "features": {"state": {"properties": {"value": "safe"}}, "current_zone": {"properties": {"value": "section_b"}}, "evacuation_status": {"properties": {"value": "none"}}}},
+  "org.openegiz.safety:worker-10": {"policyId": "default:basic_policy", "attributes": {"name": "Работник 10", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "worker", "zone": "refuge_chamber"}, "features": {"state": {"properties": {"value": "safe"}}, "current_zone": {"properties": {"value": "refuge_chamber"}}, "evacuation_status": {"properties": {"value": "none"}}}},
+  "org.openegiz.safety:loader-01": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Погрузочная машина 01", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "equipment", "equipment_type": "loader", "zone": "section_a"},
+    "features": {"state": {"properties": {"value": "operating"}}, "current_zone": {"properties": {"value": "section_a"}}}
+  },
+  "org.openegiz.safety:transport-01": {
+    "policyId": "default:basic_policy",
+    "attributes": {"name": "Шахтный транспорт 01", "_isType": false, "_parents": "org.openegiz.safety:mine-01", "kind": "equipment", "equipment_type": "mine_transport", "zone": "section_b"},
+    "features": {"state": {"properties": {"value": "operating"}}, "current_zone": {"properties": {"value": "section_b"}}}
+  }
+}

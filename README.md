@@ -1,40 +1,101 @@
-# <Team name>: a digital mine on OpenEgiz
+# Команда 032 — безопасность подземной шахты на OpenEgiz
 
-> Team Repository of the contest “Digital Mine on OpenEgiz”. **Replace the contents of this file with the instructions for your Submission.** The AI Jury runs the Submission strictly by these instructions, from scratch, in the Judge Environment. Accepted languages: English, Kazakh, Russian.
+Конкурсный стенд моделирует вентиляцию и безопасность подземной шахты. Setup автоматически создаёт 26 цифровых двойников в Eclipse Ditto. Модель каждые 2 секунды передаёт сводку шахты и пять датчиков в штатном формате событий `opentwins`; Telegraf записывает их в InfluxDB. Этот исторический канал не создаёт очередь команд Ditto на ноутбуке с 8 GiB; отдельный `make smoke` по-прежнему проверяет полную цепочку MQTT → Ditto → MQTT → Telegraf → InfluxDB. Grafana показывает русскоязычную 2D-карту с людьми, техникой, вентиляторами, риском и рекомендациями диспетчеру.
 
-## Running
+## Быстрый запуск для жюри на Linux
 
-Requirements (Docker, `make`, Windows/WSL2 setup) are in [OPENEGIZ.md](OPENEGIZ.md) / [OPENEGIZ.ru.md](OPENEGIZ.ru.md).
+Требуются Docker с Compose v2.20+, Git, GNU Make и не менее 6 ГиБ памяти, доступной Docker. На Ubuntu или Debian:
 
 ```bash
-sudo apt install -y make   # if make is missing (clean Ubuntu)
-make up            # the OpenEgiz platform
-make example-mine  # the Example Mine: twins, simulator, dashboard
+sudo apt-get update
+sudo apt-get install -y make
+make up
+make smoke
 ```
 
-Replace these commands with the commands of your Submission. The Submission must start by following these instructions without manual intervention (Rules, clause 6.4); downloading datasets and models and building are also listed here.
+`make up` запускает OpenEgiz вместе с конкурсным модулем. Двойники и dashboard создаются автоматически; `make example-mine` для этого решения не нужен. Первый запуск скачивает образы и занимает несколько минут.
 
-## What to open
+## Запуск на Windows
 
-- Grafana: the address and login are printed by `make up`.
-- <where to see the mine visualization, which dashboards>
+Проверенный вариант использует Docker Desktop, GNU Make для Windows и Git for Windows. Команды выполняются в PowerShell из корня репозитория. Важно, чтобы каталог GNU Make и Git Bash находились в `PATH` раньше системного WSL `bash.exe`:
 
-## Repository contents
+```powershell
+$env:Path = 'C:\Program Files (x86)\GnuWin32\bin;C:\Program Files\Git\bin;' + $env:Path
+make --version
+bash --version
+make up
+make smoke
+```
 
-| Path | Contents |
+При `OS=Windows_NT` Makefile автоматически подключает `deploy/compose/docker-compose.windows.yml`; вручную указывать overlay не требуется. На проверенном ноутбуке с 8 ГиБ ОЗУ стенд прошёл чистые `make up` и `make smoke`, хотя Docker видел около 3 ГиБ вместо рекомендуемых 6 ГиБ. После холодного запуска при таком лимите исходящему соединению Ditto может потребоваться время на автоматическое восстановление перед повтором smoke.
+
+## Учётные данные и адреса
+
+При первом `make up` случайные пароли создаются в локальном файле `deploy/compose/.env`. Они не входят в Git. Команда также печатает адреса и логины. Пароль Grafana можно повторно посмотреть так:
+
+Linux или Git Bash:
+
+```bash
+grep '^GRAFANA_ADMIN_PASSWORD=' deploy/compose/.env
+```
+
+PowerShell:
+
+```powershell
+Get-Content deploy/compose/.env | Select-String '^GRAFANA_ADMIN_PASSWORD='
+```
+
+Вход в Grafana: пользователь `admin`, пароль из `GRAFANA_ADMIN_PASSWORD`.
+
+| Экран | Адрес |
 |---|---|
-| `team/` | Directory for the Team's code. Using it is optional: any part may be changed, including the platform core |
-| `SUBMISSION.md` | Description of the Submission: **required** |
-| `presentation.pdf` | Presentation: **required**, in the repository root |
-| `examples/mine/` | The Example Mine: shows how a digital mine is built on OpenEgiz. It is not a basis for the Submission |
-| `OPENEGIZ.md`, `OPENEGIZ.ru.md` | Documentation of the OpenEgiz platform v1.0.4 |
+| Единый dashboard Grafana | `http://127.0.0.1:3000/d/openegiz-underground-mine-safety/bezopasnost--podzemnoj-shahty` |
+| Grafana, стартовая страница | `http://127.0.0.1:3000/` |
+| Оперативная карта отдельно | `http://127.0.0.1:8091/` |
+| Проверка сервиса | `http://127.0.0.1:8091/health` |
 
-The Submission is the `main` branch at the moment of the Freeze; other branches are not evaluated.
+В Grafana dashboard также доступен через **Dashboards → OpenEgiz Examples → Безопасность подземной шахты**.
 
-## License
+## Демонстрация за 5 минут
 
-The Submission is distributed under the MIT license, see [LICENSE](LICENSE). Copyright belongs to the Team: add the line `Copyright (c) 2026 <Team members>` to `LICENSE`.
+1. Выполнить `make up`, затем `make smoke`.
+2. Войти в Grafana и открыть dashboard **Безопасность подземной шахты**.
+3. Убедиться, что общий риск — «НОРМА», пять зон зелёные, работают три вентилятора, на карте находятся 10 работников и две единицы техники.
+4. Нажать «Запустить» у сценария **Отказ главного вентилятора**. Проверить остановку `fan-main`, падение воздушного потока, опасные зоны, затронутых людей, причины, блок **Маршруты эвакуации** с анимацией, **Советник по вентиляции** с прогнозом на 10 минут и **Энергетика вентиляторов**, где безопасный режим требует дополнительной мощности. Нажать **Сбросить**.
+5. Для **Выброса метана** выбрать участок A или B и запустить сценарий. Проверить рост CH₄, локальную опасность и зелёный маршрут участка через главный штрек к стволу. Нажать **Сбросить**.
+6. Для **Пожара** выбрать главный штрек или добычный участок. Проверить рост CO, дыма и температуры, распространение воздействия по стрелкам воздуха и предупреждение для маршрута через опасную зону. Нажать **Сбросить**.
+7. Для **Перекрытия выработки** выбрать участок A или B. Проверить разрыв стрелки воздушного потока, падение скорости воздуха и сообщение, что для работников отрезанного участка маршрут закрыт. Нажать **Сбросить**.
+8. В каждом сценарии сравнить две строки прогноза: **Без действий** и **По совету**, проверить целевые проценты вентиляторов и ручные действия диспетчера.
+9. Убедиться, что после последнего сброса dashboard снова показывает «НОРМА», советник — «СТАБИЛЬНО», а план эвакуации — «ГОТОВНОСТЬ».
 
----
+Сценарий отражается на оперативной карте сразу и не позднее 5 секунд. Исторические графики могут отставать примерно на 10 секунд из-за штатной буферизации Telegraf.
 
-Platform: [aleka07/openegiz](https://github.com/aleka07/openegiz). If the platform was useful to you, support the project with a star on GitHub.
+## Управление стендом
+
+| Команда | Результат |
+|---|---|
+| `make up` | Запустить платформу и конкурсный модуль; создать двойники и dashboard |
+| `make smoke` | Проверить OpenEgiz и четыре конкурсных сценария через публичные HTTP-интерфейсы |
+| `make ps` | Показать контейнеры и их состояния |
+| `make logs S=mine-safety` | Показать логи конкурсного сервиса |
+| `make down` | Остановить стенд, сохранив данные |
+| `make clean` | Остановить стенд и безвозвратно удалить volumes, данные и локальные пароли |
+
+`make clean` нужен только для проверки действительно чистого запуска. Не выполняйте его, если данные текущего стенда нужно сохранить.
+
+## Состав решения
+
+- `team/mine-safety/` — модель, загрузчик двойников, API, карта, dashboard, тесты и техническая документация.
+- `SUBMISSION.md` — конкурсное описание модулей, сценариев, данных и ограничений.
+- `Makefile` — единый жизненный цикл базовой платформы и конкурсного overlay.
+- `OPENEGIZ.ru.md` — подробная документация базовой платформы.
+
+Подробности архитектуры, API, порогов и допущений находятся в [техническом README](team/mine-safety/README.md).
+
+## Важное ограничение
+
+Это демонстрационная синтетическая модель. Она не сертифицирована для промышленной эксплуатации, не подключена к реальному оборудованию и не выполняет автоматическое управление или эвакуацию. Все рекомендации предназначены только для конкурсной демонстрации.
+
+## Лицензия
+
+Код распространяется по лицензии MIT, см. [LICENSE](LICENSE). Базовая платформа: [OpenEgiz](https://github.com/aleka07/openegiz).

@@ -1,0 +1,53 @@
+# Competition submission overlay for deploy/compose/docker-compose.yml.
+# Paths are relative to deploy/compose, the first Compose file.
+
+services:
+  mine-safety-setup:
+    build: ../../team/mine-safety
+    image: openegiz/mine-safety:local
+    restart: "no"
+    command: ["python", "setup_twins.py"]
+    environment:
+      DITTO_URL: http://ditto-nginx:80
+      DITTO_PASSWORD: ${DITTO_PASSWORD}
+    depends_on:
+      init:
+        condition: service_completed_successfully
+
+  # The setup service builds the shared local image before Compose creates
+  # this service. Avoid a second concurrent build/tag operation on Windows.
+  mine-safety:
+    image: openegiz/mine-safety:local
+    pull_policy: never
+    restart: unless-stopped
+    mem_limit: 192m
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: "8091"
+      MQTT_HOST: mosquitto
+      MQTT_PORT: "1883"
+      SIM_INTERVAL: "2"
+      SIM_SEED: ${MINE_SAFETY_SEED:-42}
+    ports:
+      - "${OPENEGIZ_BIND:-127.0.0.1}:${MINE_SAFETY_PORT:-8091}:8091"
+    depends_on:
+      mine-safety-setup:
+        condition: service_completed_successfully
+      mosquitto:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8091/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  grafana:
+    environment:
+      # Required only for the local iframe that embeds the interactive map in
+      # Grafana's built-in Text panel. No external scripts or CDN are used.
+      GF_PANELS_DISABLE_SANITIZE_HTML: "true"
+    volumes:
+      # The base stack reserves this writable tmpfs-backed provisioned path
+      # for overlay dashboards. Its main dashboards directory is read-only.
+      - ../../team/mine-safety/dashboard.json:/var/lib/grafana/example-dashboards/mine-safety.json:ro

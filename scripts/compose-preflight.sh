@@ -22,6 +22,22 @@ if [ "$major" -lt 2 ] || { [ "$major" -eq 2 ] && [ "$minor" -lt 20 ]; }; then
   die "Docker Compose $compose_version is too old; 2.20 or newer is required."
 fi
 
+# Docker Compose on Windows interprets the base service's remote Git build
+# context as a drive-relative path. Keep the upstream checkout out of this
+# repository and materialize the pinned source only when the Windows overlay
+# needs it.
+if [ "${OS:-}" = "Windows_NT" ]; then
+  extended_api_src="$ROOT/build/extended-api-src"
+  extended_api_commit="b49663dea326854a2323423eaeab7e7f54d325a7"
+  if [ ! -f "$extended_api_src/package.json" ]; then
+    [ ! -e "$extended_api_src" ] || die "Incomplete extended API checkout: $extended_api_src (remove it and retry)."
+    command -v git >/dev/null 2>&1 || die "Git is required to prepare the extended API source on Windows."
+    mkdir -p "$ROOT/build"
+    git clone --filter=blob:none https://github.com/ertis-research/extended-api-for-eclipse-ditto.git "$extended_api_src"
+    git -C "$extended_api_src" checkout --detach "$extended_api_commit"
+  fi
+fi
+
 mem_bytes="$(docker info --format '{{.MemTotal}}')"
 mem_gib=$((mem_bytes / 1024 / 1024 / 1024))
 if [ "$mem_gib" -lt 6 ]; then

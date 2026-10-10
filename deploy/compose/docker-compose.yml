@@ -58,8 +58,11 @@ x-ditto-service: &ditto-service
 #   kernels without the cgroup v1 memory controller (Docker Desktop's 6.12
 #   kernel): a percentage then means a share of all of Docker's memory, and
 #   every JVM was killed within minutes. -Xmx does not depend on that.
+# - Five JVMs exposing two processors each can oversubscribe a 6-CPU Docker
+#   Desktop VM during cluster replication. One active processor per JVM is
+#   sufficient for this demonstration workload and keeps API latency stable.
 x-ditto-java-options: &ditto-java-options >-
-  -XX:ActiveProcessorCount=2 -XX:+ExitOnOutOfMemoryError -XX:+UseContainerSupport
+  -XX:ActiveProcessorCount=1 -XX:+ExitOnOutOfMemoryError -XX:+UseContainerSupport
   -XX:+UseStringDeduplication -Xss512k -XX:+UseG1GC
   -XX:MaxGCPauseMillis=150 -Dakka.coordinated-shutdown.exit-jvm=on
   -Dakka.cluster.shutdown-after-unsuccessful-join-seed-nodes=180s

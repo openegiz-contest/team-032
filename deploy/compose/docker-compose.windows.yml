@@ -1,0 +1,12 @@
+services:
+  mongodb:
+    # mongosh exits with SIGSEGV under this Docker Desktop/WSL backend even
+    # though mongod is accepting connections. Check the listener directly.
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/27017"]
+
+  extended-api:
+    build:
+      # Docker Compose on Windows treats the remote Git URL in the base file
+      # as a drive-relative path. Use the same pinned source cloned locally.
+      context: ../../build/extended-api-src

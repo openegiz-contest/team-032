@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Цифровой двойник шахты — безопасность</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">Ш</span>
+        <div>
+          <p class="eyebrow">OpenEgiz · диспетчерский центр</p>
+          <h1>Безопасность подземной шахты</h1>
+        </div>
+      </div>
+      <div class="system-state">
+        <span class="live-dot" id="live-dot" aria-hidden="true"></span>
+        <div>
+          <strong id="connection-label">Подключение…</strong>
+          <span id="updated-at">Ожидание телеметрии</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="kpi-grid" aria-label="Ключевые показатели">
+      <article class="kpi-card">
+        <span class="kpi-label">Общий риск</span>
+        <strong class="kpi-value risk-normal" id="kpi-risk">НОРМА</strong>
+        <span class="kpi-caption" id="kpi-risk-caption">Все зоны штатны</span>
+      </article>
+      <article class="kpi-card">
+        <span class="kpi-label">Макс. метан</span>
+        <strong class="kpi-value" id="kpi-methane">—</strong>
+        <span class="kpi-caption">% объёмной доли</span>
+      </article>
+      <article class="kpi-card">
+        <span class="kpi-label">Макс. CO</span>
+        <strong class="kpi-value" id="kpi-co">—</strong>
+        <span class="kpi-caption">ppm</span>
+      </article>
+      <article class="kpi-card">
+        <span class="kpi-label">Мин. поток</span>
+        <strong class="kpi-value" id="kpi-airflow">—</strong>
+        <span class="kpi-caption">м/с</span>
+      </article>
+      <article class="kpi-card">
+        <span class="kpi-label">Затронуто людей</span>
+        <strong class="kpi-value" id="kpi-people">0</strong>
+        <span class="kpi-caption">из 10 работников</span>
+      </article>
+    </section>
+
+    <main class="workspace">
+      <section class="map-card" aria-labelledby="map-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Оперативная схема</p>
+            <h2 id="map-title">Вентиляция и расположение объектов</h2>
+          </div>
+          <div class="legend" aria-label="Легенда состояний">
+            <span><i class="legend-dot normal"></i>Норма</span>
+            <span><i class="legend-dot warning"></i>Внимание</span>
+            <span><i class="legend-dot critical"></i>Опасность</span>
+            <span><i class="legend-line"></i>Поток воздуха</span>
+          </div>
+        </div>
+
+        <div class="mine-map-wrap">
+          <svg id="mine-map" class="mine-map" viewBox="0 0 1120 620" role="img" aria-labelledby="mine-map-title mine-map-description">
+            <title id="mine-map-title">Схема пяти зон подземной шахты</title>
+            <desc id="mine-map-description">Ствол соединён с главным штреком, двумя добычными участками и эвакуационной камерой. Стрелки показывают направление воздуха.</desc>
+            <defs>
+              <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+                <path d="M 32 0 L 0 0 0 32" fill="none" stroke="currentColor" stroke-opacity=".08" stroke-width="1"/>
+              </pattern>
+              <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" class="arrow-head"/>
+              </marker>
+              <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <rect class="map-grid" x="0" y="0" width="1120" height="620" rx="22"/>
+
+            <g class="air-connections" aria-label="Воздушные потоки">
+              <path id="edge-shaft-main_drift" class="air-edge active" d="M190 310 H350" marker-end="url(#arrow)"/>
+              <path id="edge-main_drift-section_a" class="air-edge active" d="M690 280 C760 280 760 168 835 168" marker-end="url(#arrow)"/>
+              <path id="edge-main_drift-section_b" class="air-edge active" d="M690 340 C760 340 760 470 835 470" marker-end="url(#arrow)"/>
+              <path id="edge-main_drift-refuge_chamber" class="air-edge active" d="M520 390 V470" marker-end="url(#arrow)"/>
+            </g>
+
+            <g class="zone normal" data-zone="shaft" tabindex="0" role="group" aria-label="Ствол">
+              <rect class="zone-shape" x="55" y="82" width="150" height="460" rx="24"/>
+              <path class="shaft-rail" d="M98 130 V500 M160 130 V500 M98 180 H160 M98 240 H160 M98 300 H160 M98 360 H160 M98 420 H160 M98 480 H160"/>
+              <text class="zone-title" x="130" y="112" text-anchor="middle">Ствол</text>
+              <text class="zone-id" x="130" y="525" text-anchor="middle">shaft</text>
+              <text class="zone-metrics" id="metrics-shaft" x="130" y="570" text-anchor="middle">—</text>
+            </g>
+
+            <g class="zone normal" data-zone="main_drift" tabindex="0" role="group" aria-label="Главный штрек">
+              <rect class="zone-shape" x="330" y="245" width="380" height="145" rx="30"/>
+              <path class="tunnel-detail" d="M365 350 H675 M390 270 V365 M650 270 V365"/>
+              <text class="zone-title" x="520" y="292" text-anchor="middle">Главный штрек</text>
+              <text class="zone-id" x="520" y="315" text-anchor="middle">main_drift</text>
+              <text class="zone-metrics" id="metrics-main_drift" x="520" y="370" text-anchor="middle">—</text>
+            </g>
+
+            <g class="zone normal" data-zone="section_a" tabindex="0" role="group" aria-label="Добычный участок A">
+              <path class="zone-shape" d="M830 75 H1050 Q1080 75 1080 105 V225 Q1080 255 1050 255 H830 Q805 255 805 230 V100 Q805 75 830 75 Z"/>
+              <path class="tunnel-detail" d="M845 215 L890 112 L935 215 L980 112 L1030 215"/>
+              <text class="zone-title" x="942" y="112" text-anchor="middle">Добычный участок A</text>
+              <text class="zone-id" x="942" y="137" text-anchor="middle">section_a</text>
+              <text class="zone-metrics" id="metrics-section_a" x="942" y="238" text-anchor="middle">—</text>
+            </g>
+
+            <g class="zone normal" data-zone="section_b" tabindex="0" role="group" aria-label="Добычный участок B">
+              <path class="zone-shape" d="M830 370 H1050 Q1080 370 1080 400 V520 Q1080 550 1050 550 H830 Q805 550 805 525 V395 Q805 370 830 370 Z"/>
+              <path class="tunnel-detail" d="M845 510 L890 407 L935 510 L980 407 L1030 510"/>
+              <text class="zone-title" x="942" y="407" text-anchor="middle">Добычный участок B</text>
+              <text class="zone-id" x="942" y="432" text-anchor="middle">section_b</text>
+              <text class="zone-metrics" id="metrics-section_b" x="942" y="533" text-anchor="middle">—</text>
+            </g>
+
+            <g class="zone normal" data-zone="refuge_chamber" tabindex="0" role="group" aria-label="Эвакуационная камера">
+              <rect class="zone-shape" x="350" y="475" width="340" height="115" rx="50"/>
+              <path class="shelter-symbol" d="M390 545 L420 510 L450 545 M420 520 V565"/>
+              <text class="zone-title" x="535" y="515" text-anchor="middle">Эвакуационная камера</text>
+              <text class="zone-id" x="535" y="539" text-anchor="middle">refuge_chamber</text>
+              <text class="zone-metrics" id="metrics-refuge_chamber" x="535" y="570" text-anchor="middle">—</text>
+            </g>
+
+            <g class="fan-layer" aria-label="Вентиляторы">
+              <g class="fan" id="fan-main" transform="translate(130 335)"><circle r="24"/><path d="M0-18 C16-18 20-6 8 0 C18 12 8 22-3 12 C-12 22-24 15-18 1 C-28-7-20-20-6-14 Z"/></g>
+              <g class="fan" id="fan-aux-a" transform="translate(840 165)"><circle r="19"/><path d="M0-14 C12-14 15-4 6 0 C14 9 6 16-2 9 C-9 16-18 11-13 1 C-21-5-15-15-4-10 Z"/></g>
+              <g class="fan" id="fan-aux-b" transform="translate(840 465)"><circle r="19"/><path d="M0-14 C12-14 15-4 6 0 C14 9 6 16-2 9 C-9 16-18 11-13 1 C-21-5-15-15-4-10 Z"/></g>
+            </g>
+            <g id="evacuation-layer" aria-label="Рекомендуемые маршруты эвакуации"></g>
+            <g id="equipment-layer" aria-label="Техника"></g>
+            <g id="worker-layer" aria-label="Работники"></g>
+          </svg>
+        </div>
+
+        <div class="object-strip">
+          <div><span class="object-icon worker-icon">●</span><strong>Работники</strong><span id="worker-summary">10 в шахте</span></div>
+          <div><span class="object-icon equipment-icon">◆</span><strong>Техника</strong><span id="equipment-summary">2 в работе</span></div>
+          <div><span class="object-icon fan-icon">✣</span><strong>Вентиляция</strong><span id="fan-summary">3 вентилятора работают</span></div>
+        </div>
+      </section>
+
+      <aside class="side-column">
+        <section class="panel incident-panel" id="incident-panel" aria-labelledby="incident-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Текущий инцидент</p>
+              <h2 id="incident-title">Штатный режим</h2>
+            </div>
+            <span class="status-badge normal" id="incident-badge">НОРМА</span>
+          </div>
+          <p class="incident-summary" id="incident-summary">Опасные отклонения не обнаружены.</p>
+          <div class="incident-facts">
+            <div><span>Источник</span><strong id="incident-source">—</strong></div>
+            <div><span>Зоны</span><strong id="incident-zones">0</strong></div>
+            <div><span>Люди</span><strong id="incident-people">0</strong></div>
+          </div>
+          <div class="detail-block">
+            <h3>Наблюдаемые причины</h3>
+            <ul id="cause-list"><li>Показатели в норме</li></ul>
+          </div>
+          <div class="recommendation-box">
+            <span class="recommendation-icon" aria-hidden="true">!</span>
+            <div>
+              <h3>Рекомендация диспетчеру</h3>
+              <ul id="recommendation-list"><li>Продолжать штатный мониторинг.</li></ul>
+            </div>
+          </div>
+          <p class="advisory-note">Система рекомендует действия, но не управляет оборудованием автоматически.</p>
+        </section>
+
+        <section class="panel fan-panel" aria-labelledby="fan-title">
+          <div class="panel-heading compact">
+            <div><p class="eyebrow">Оборудование</p><h2 id="fan-title">Вентиляторы</h2></div>
+          </div>
+          <div class="fan-list" id="fan-list"></div>
+        </section>
+      </aside>
+
+        <section class="panel evacuation-panel" id="evacuation-panel" aria-labelledby="evacuation-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">План безопасности</p>
+              <h2 id="evacuation-title">Маршруты эвакуации</h2>
+            </div>
+            <span class="status-badge normal" id="evacuation-badge">ГОТОВНОСТЬ</span>
+          </div>
+          <p class="evacuation-summary" id="evacuation-summary">Эвакуация не требуется; маршруты готовы к расчёту.</p>
+          <div class="evacuation-facts">
+            <div><span>Всего</span><strong id="evacuation-total">0</strong></div>
+            <div><span>Маршрут есть</span><strong id="evacuation-routed">0</strong></div>
+            <div><span>Маршрут закрыт</span><strong id="evacuation-unrouted">0</strong></div>
+          </div>
+          <div class="evacuation-routes" id="evacuation-routes" aria-label="Рассчитанные маршруты">
+            <p class="empty-route">Активных маршрутов нет.</p>
+          </div>
+          <p class="advisory-note">Анимация показывает рекомендуемое направление. Эвакуацию запускает только ответственный диспетчер.</p>
+        </section>
+
+        <section class="panel advisor-panel" id="advisor-panel" aria-labelledby="advisor-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Прогноз · 10 минут</p>
+              <h2 id="advisor-title">Советник по вентиляции</h2>
+            </div>
+            <span class="status-badge normal" id="advisor-badge">СТАБИЛЬНО</span>
+          </div>
+          <p class="advisor-mode"><span>Рекомендуемый режим</span><strong id="advisor-mode">Штатный контроль</strong></p>
+          <p class="advisor-summary" id="advisor-summary">Выполняется расчёт прогноза…</p>
+          <div class="forecast-compare" aria-label="Сравнение прогноза риска">
+            <div><span>Без действий · 10 мин</span><strong class="risk-normal" id="forecast-baseline">НОРМА</strong><small id="forecast-baseline-zones">0 зон</small></div>
+            <div><span>При выполнении совета</span><strong class="risk-normal" id="forecast-advised">НОРМА</strong><small id="forecast-advised-zones">0 зон</small></div>
+          </div>
+          <div class="forecast-chart" id="forecast-chart" aria-label="Траектория риска по минутам"></div>
+          <div class="fan-targets" id="fan-targets" aria-label="Рекомендуемые скорости вентиляторов"></div>
+          <div class="detail-block advisor-actions">
+            <h3>Действия диспетчера</h3>
+            <ul id="advisor-action-list"><li>Продолжать штатный мониторинг.</li></ul>
+          </div>
+          <p class="advisory-note">Прогноз демонстрационный. Советник не отправляет команды оборудованию.</p>
+        </section>
+
+        <section class="panel energy-panel" id="energy-panel" aria-labelledby="energy-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Энергоэффективность · 10 минут</p>
+              <h2 id="energy-title">Энергетика вентиляторов</h2>
+            </div>
+            <span class="energy-badge" id="energy-saving">—%</span>
+          </div>
+          <div class="energy-totals" aria-label="Сравнение мощности вентиляторов">
+            <div><span>Текущая мощность</span><strong id="energy-current-power">— кВт</strong><small id="energy-current-cost">— ₸ / 10 мин</small></div>
+            <div><span>По рекомендации</span><strong id="energy-advised-power">— кВт</strong><small id="energy-advised-cost">— ₸ / 10 мин</small></div>
+          </div>
+          <p class="energy-summary" id="energy-summary">Выполняется расчёт энергопотребления…</p>
+          <div class="energy-fans" id="energy-fans" aria-label="Мощность по каждому вентилятору"></div>
+          <div class="energy-daily">
+            <span>Потенциал за сутки относительно режима 100%</span>
+            <strong id="energy-daily-saving">— кВт·ч · — ₸</strong>
+          </div>
+          <p class="advisory-note">Оценка использует кубическую зависимость мощности. В аварии безопасность важнее экономии.</p>
+        </section>
+
+        <section class="panel controls-panel" aria-labelledby="controls-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">What-if</p>
+              <h2 id="controls-title">Аварийные сценарии</h2>
+            </div>
+            <button class="reset-button" id="reset-scenario" type="button">Сбросить</button>
+          </div>
+
+          <div class="scenario-list">
+            <article class="scenario-row">
+              <div><strong>Отказ главного вентилятора</strong><span>Падение потока во всех выработках</span></div>
+              <button class="scenario-button" data-scenario="main_fan_failure" type="button">Запустить</button>
+            </article>
+            <article class="scenario-row with-select">
+              <div><strong>Выброс метана</strong><span>Рост CH₄ в выбранном участке</span></div>
+              <label>Зона
+                <select id="methane-zone" aria-label="Зона выброса метана">
+                  <option value="section_a">Участок A</option>
+                  <option value="section_b">Участок B</option>
+                </select>
+              </label>
+              <button class="scenario-button" data-scenario="methane_release" data-zone-select="methane-zone" type="button">Запустить</button>
+            </article>
+            <article class="scenario-row with-select">
+              <div><strong>Пожар</strong><span>Рост CO, дыма и температуры</span></div>
+              <label>Зона
+                <select id="fire-zone" aria-label="Зона пожара">
+                  <option value="main_drift">Главный штрек</option>
+                  <option value="section_a">Участок A</option>
+                  <option value="section_b">Участок B</option>
+                </select>
+              </label>
+              <button class="scenario-button" data-scenario="fire" data-zone-select="fire-zone" type="button">Запустить</button>
+            </article>
+            <article class="scenario-row with-select">
+              <div><strong>Перекрытие выработки</strong><span>Разрыв воздушного потока</span></div>
+              <label>Зона
+                <select id="blocked-zone" aria-label="Перекрываемая зона">
+                  <option value="section_a">Участок A</option>
+                  <option value="section_b">Участок B</option>
+                </select>
+              </label>
+              <button class="scenario-button" data-scenario="blocked_working" data-zone-select="blocked-zone" type="button">Запустить</button>
+            </article>
+          </div>
+          <p class="control-status" id="control-status" role="status" aria-live="polite">Готово к запуску сценария</p>
+        </section>
+
+    </main>
+
+    <footer>
+      <span>Демонстрационная синтетическая модель · не для промышленного управления</span>
+      <span id="telemetry-sequence">Кадр телеметрии: —</span>
+    </footer>
+  </div>
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
